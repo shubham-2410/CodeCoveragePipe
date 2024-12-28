@@ -128,7 +128,7 @@ pipeline {
                 bat '''
                 set PATH=%PYTHON_PATH%;%PATH%
 
-                              sonar-scanner
+                              sonar-scanner ^
                               -Dsonar.projectKey=CodeCoveragePipe ^
                               -Dsonar.sources=. ^
                               -Dsonar.python.coverage.reportPaths=coverage.xml ^
