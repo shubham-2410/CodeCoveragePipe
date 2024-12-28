@@ -18,7 +18,7 @@ pipeline {
                 // Ensure Python and dependencies are installed
                 bat '''
                     set PATH=%PYTHON_PATH%;%PATH%
-                    pip show coverage
+                    pip install coverage
                 '''
             }
         }
