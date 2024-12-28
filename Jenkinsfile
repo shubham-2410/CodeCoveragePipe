@@ -80,63 +80,72 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // Checkout the code from your repository
                 checkout scm
             }
         }
 
-        stage('Install Dependencies') {
+        stage('Verify Coverage Installation') {
             steps {
-                // Ensure Python and dependencies are installed
                 bat '''
-                    set PATH=%PYTHON_PATH%;%PATH%
-                    pip install coverage
+                set PATH=%PYTHON_PATH%;%PATH%
+                pip show coverage
                 '''
             }
         }
 
-        stage('Run Tests and Collect Coverage') {
+        stage('Run Unit Tests and Generate Coverage') {
             steps {
-                // Run unit tests and collect code coverage
                 bat '''
-                    set PATH=%PYTHON_PATH%;%PATH%
-                    coverage run -m unittest discover -s tests -p "test_*.py"
-                    coverage xml -o coverage.xml
+                set PATH=%PYTHON_PATH%;%PATH%
+                echo "Running tests with coverage..."
+                coverage run --source=. fibo_test.py
+                coverage xml -o coverage.xml
+                if exist coverage.xml (
+                    echo "Coverage report generated successfully."
+                ) else (
+                    echo "Error: Coverage report not found!"
+                    exit /b 1
+                )
+                '''
+            }
+        }
 
-                    if exist coverage.xml (
-                        echo "Coverage report generated Successfully."
-                    ) else (
-                        echo "Error: Coverage report not found!"
-                        exit /b 1
-                    )
+        stage('Ensure Correct Working Directory') {
+            steps {
+                bat '''
+                set PATH=%PYTHON_PATH%;%PATH%
+                echo "Current working directory: %cd%"
+                dir
                 '''
             }
         }
 
         stage('SonarQube Analysis') {
             environment {
-                SONAR_TOKEN = credentials('sonarqube-token')
+                SONAR_TOKEN = credentials('sonarqube-token') // Accessing the SonarQube token stored in Jenkins credentials
             }
             steps {
-                // Run SonarQube analysis, including coverage data
                 bat '''
-                    set PATH=%PYTHON_PATH%;%PATH%
-                    sonar-scanner -Dsonar.projectKey=LearnPipeline ^
-                    -Dsonar.sources=. ^
-                    -Dsonar.host.url=http://localhost:9000 ^
-                    -Dsonar.token=%SONAR_TOKEN% ^
-                    -Dsonar.python.coverage.reportPaths=coverage.xml
+                set PATH=%PYTHON_PATH%;%PATH%
+                sonar-scanner -Dsonar.projectKey=github_trial1 ^
+                              -Dsonar.projectName=Trial1 ^
+                              -Dsonar.sources=. ^
+                              -Dsonar.python.coverage.reportPaths=coverage.xml ^
+                              -Dsonar.host.url=http://localhost:9000 ^
+                              -Dsonar.token=%SONAR_TOKEN%
                 '''
             }
         }
     }
-
     post {
         success {
-            echo "Pipeline successfully completed"
+            echo 'Pipeline completed successfully'
         }
         failure {
-            echo "Pipeline failed"
+            echo 'Pipeline failed'
+        }
+        always {
+            echo 'This runs regardless of the result.'
         }
     }
 }
