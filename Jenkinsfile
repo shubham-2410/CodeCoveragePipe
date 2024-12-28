@@ -30,6 +30,13 @@ pipeline {
                     set PATH=%PYTHON_PATH%;%PATH%
                     coverage run -m unittest discover
                     coverage xml -o coverage.xml
+
+                    if exist coverage.xml (
+                        echo "Coverage report generated Successfully."
+                    ) else (
+                        echo "Error : Coverage report not found!"
+                        exit /b 1
+                    )
                 '''
             }
         }
