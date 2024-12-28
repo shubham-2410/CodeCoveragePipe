@@ -98,7 +98,7 @@ pipeline {
                 bat '''
                 set PATH=%PYTHON_PATH%;%PATH%
                 echo "Running tests with coverage..."
-                coverage run --source=. fibo_test.py
+                coverage run --source= tests/fibo_test.py
                 coverage xml -o coverage.xml
                 if exist coverage.xml (
                     echo "Coverage report generated successfully."
@@ -127,8 +127,9 @@ pipeline {
             steps {
                 bat '''
                 set PATH=%PYTHON_PATH%;%PATH%
-                sonar-scanner -Dsonar.projectKey=github_trial1 ^
-                              -Dsonar.projectName=Trial1 ^
+
+                              sonar-scanner
+                              -Dsonar.projectKey=CodeCoveragePipe ^
                               -Dsonar.sources=. ^
                               -Dsonar.python.coverage.reportPaths=coverage.xml ^
                               -Dsonar.host.url=http://localhost:9000 ^
